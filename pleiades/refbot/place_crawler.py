@@ -17,10 +17,12 @@ class Walker():
         if not isdir(self.path):
             raise IOError(
                 '{} is not a valid directory path'.format(self.path))
+        self.count = False
         self.extensions = [e.lower() for e in extensions]
 
-    def walk(self):
-        self.count = 0
+    def walk(self, count=True):
+        if count:
+            self.count = 0
         for root, dirs, files in walk(self.path):
             logger.debug('at {}: {}'.format(root, repr(files)))
             if len(self.extensions) > 0:
@@ -30,7 +32,8 @@ class Walker():
             else:
                 select_files = files
             logger.debug('selected files: {}'.format(sorted(select_files)))
-            self.count += len(select_files)
+            if count:
+                self.count += len(select_files)
             self._do(select_files)
         return self.count
 
@@ -43,18 +46,14 @@ class PlaceCrawler():
     """A class to crawl a hierarchical directory tree of Pleiades place JSON.
     """
 
-    def __init__(self, json_path, sniff=True):
+    def __init__(self, json_path, count=True):
         """Initialize the PlaceCrawler class and sniff the JSON tree."""
-        self.json_path = abspath(realpath(json_path))
-        if sniff:
-            if not isdir(self.json_path):
-                raise IOError(
-                    '{} is not a valid directory path'.format(self.json_path))
+        self.json_path = json_path
+        self.count = False
+        if count:
             self._count_json_files()
-        else:
-            self.count = -1
 
     def _count_json_files(self):
         """Walk the tree and json_path and count each JSON file visited."""
         walker = Walker(self.json_path, ['.json'])
-        self.count = walker.walk()
+        self.count = walker.walk(count=True)

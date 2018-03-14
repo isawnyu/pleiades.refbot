@@ -39,3 +39,9 @@ class Test_This(TestCase):
         """Verify PlaceCrawler successfully visits all JSON files."""
         pc = PlaceCrawler(self.place_json_path)
         assert_equal(pc.count, 11)
+
+    def test_crawl_count_not(self):
+        """Verify we can tell PlaceCrawler not to count what it visits."""
+        pc = PlaceCrawler(self.place_json_path, count=False)
+        assert_equal(pc.count, False)
+
