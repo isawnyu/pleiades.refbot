@@ -8,11 +8,13 @@ from os.path import abspath, join, realpath
 from unittest import TestCase
 
 logger = logging.getLogger(__name__)
-test_data_path = abspath(realpath(join(['tests', 'data'])))
+test_data_path = ['tests', 'data']
+place_json_path = test_data_path
+place_json_path.append('place_json')
 
 
 def setup_module():
-    """Change me"""
+    """Module-level setup steps for all place_crawler tests."""
     pass
 
 
@@ -24,8 +26,9 @@ def teardown_module():
 class Test_This(TestCase):
 
     def setUp(self):
-        """Change me"""
-        pass
+        """Setup steps to run before each place_crawler test."""
+        global place_json_path
+        self.place_json_path = abspath(realpath(join(*place_json_path)))
 
     def tearDown(self):
         """Change me"""
