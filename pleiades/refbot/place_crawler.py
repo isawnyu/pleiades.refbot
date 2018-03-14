@@ -109,6 +109,7 @@ class PlaceCrawler():
         self.count = walker.walk(count=True)
 
     def get_references(self):
+        """Walk the tree and extract and store all references encountered."""
         walker = ReferenceWalker(path=self.json_path, extensions=['.json'])
         self.count = walker.walk()
         self.places = walker.places
@@ -118,4 +119,4 @@ class PlaceCrawler():
             for subtype in ['locations', 'names', 'connections']:
                 for subid, subrefs in pdata[subtype].items():
                     self.reference_count += len(subrefs)
-
+        return self.places
