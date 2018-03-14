@@ -5,7 +5,7 @@
 import logging
 from nose.tools import assert_equal, assert_false, assert_true, raises
 from os.path import abspath, join, realpath
-from references import ReferenceFixer
+from pleiades.refbot.references import ReferenceFixer
 from unittest import TestCase
 
 logger = logging.getLogger(__name__)
