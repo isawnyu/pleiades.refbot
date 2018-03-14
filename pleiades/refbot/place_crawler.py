@@ -3,8 +3,9 @@
 """Crawl through Pleiades place resources."""
 
 import logging
+import json
 from os import walk
-from os.path import abspath, isdir, realpath, splitext
+from os.path import abspath, isdir, join, realpath, splitext
 
 logger = logging.getLogger(__name__)
 
@@ -54,18 +55,27 @@ class Walker():
             logger.debug('selected files: {}'.format(sorted(select_files)))
             if count:
                 self.count += len(select_files)
-            self._do(select_files)
+            self._do(root, select_files)
         return self.count
 
-    def _do(self, files):
+    def _do(self, root, files):
         """Perform some action on files at a directory node."""
         pass
 
 
 class ReferenceWalker(Walker):
 
-    def __init__(self):
-        pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _do(self, root, files):
+        for file_name in files:
+            logger.debug('parsing {}'.format(file_name))
+            file_path = join(root, file_name)
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            del f
+            del data
 
 
 class PlaceCrawler():
@@ -83,3 +93,8 @@ class PlaceCrawler():
         """Walk the tree and json_path and count each JSON file visited."""
         walker = Walker(self.json_path, ['.json'])
         self.count = walker.walk(count=True)
+
+    def get_references(self):
+        walker = ReferenceWalker(path=self.json_path, extensions=['.json'])
+        self.count = walker.walk()
+
