@@ -49,3 +49,6 @@ class Test_This(TestCase):
         pc = PlaceCrawler(self.place_json_path, count=False)
         pc.get_references()
         assert_equal(pc.count, 11)
+        assert_equal(len(pc.places), 11)
+        assert_equal(pc.reference_count, 26)
+

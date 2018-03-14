@@ -67,15 +67,29 @@ class ReferenceWalker(Walker):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.places = {}
 
     def _do(self, root, files):
         for file_name in files:
             logger.debug('parsing {}'.format(file_name))
             file_path = join(root, file_name)
             with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+                place = json.load(f)
             del f
-            del data
+            d = {
+                'references': [r for r in place['references']],
+                'locations': {},
+                'names': {},
+                'connections': {}
+            }
+            for location in place['locations']:
+                d['locations'][location['id']] = [
+                    r for r in location['references']]
+            for name in place['names']:
+                d['names'][name['id']] = [r for r in name['references']]
+            # TBD: for connection in place['connections']:
+            self.places[place['id']] = d
+            del place
 
 
 class PlaceCrawler():
@@ -97,4 +111,11 @@ class PlaceCrawler():
     def get_references(self):
         walker = ReferenceWalker(path=self.json_path, extensions=['.json'])
         self.count = walker.walk()
+        self.places = walker.places
+        self.reference_count = 0
+        for pid, pdata in self.places.items():
+            self.reference_count += len(pdata['references'])
+            for subtype in ['locations', 'names', 'connections']:
+                for subid, subrefs in pdata[subtype].items():
+                    self.reference_count += len(subrefs)
 
