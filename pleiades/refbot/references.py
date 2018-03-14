@@ -11,3 +11,10 @@ class ReferenceFixer:
 
     def __init__(self):
         pass
+
+
+class PleiadesReference:
+    """House and manipulate a single Pleiades reference."""
+
+    def __init__(self):
+        pass
