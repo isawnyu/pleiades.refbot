@@ -4,9 +4,39 @@
 
 import logging
 from os import walk
-from os.path import abspath, isdir, realpath
+from os.path import abspath, isdir, realpath, splitext
 
 logger = logging.getLogger(__name__)
+
+
+class Walker():
+    """Change me."""
+
+    def __init__(self, path: str, extensions=[]):
+        self.path = abspath(realpath(path))
+        if not isdir(self.path):
+            raise IOError(
+                '{} is not a valid directory path'.format(self.path))
+        self.extensions = [e.lower() for e in extensions]
+
+    def walk(self):
+        self.count = 0
+        for root, dirs, files in walk(self.path):
+            logger.debug('at {}: {}'.format(root, repr(files)))
+            if len(self.extensions) > 0:
+                select_files = [
+                    f for f in files if splitext(f)[1].lower()
+                    in self.extensions]
+            else:
+                select_files = files
+            logger.debug('selected files: {}'.format(sorted(select_files)))
+            self.count += len(select_files)
+            self._do(select_files)
+        return self.count
+
+    def _do(self, files):
+        """Perform some action on files at a directory node."""
+        pass
 
 
 class PlaceCrawler():
@@ -26,9 +56,5 @@ class PlaceCrawler():
 
     def _count_json_files(self):
         """Walk the tree and json_path and count each JSON file visited."""
-        self.count = 0
-        for root, dirs, files in walk(self.json_path):
-            logger.debug('at {}: {}'.format(root, repr(files)))
-            json_files = [f for f in files if f.endswith('.json')]
-            logger.debug('json_files: {}'.format(repr(json_files)))
-            self.count += len(json_files)
+        walker = Walker(self.json_path, ['.json'])
+        self.count = walker.walk()
