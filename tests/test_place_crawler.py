@@ -35,6 +35,7 @@ class Test_This(TestCase):
         """Change me"""
         pass
 
-    def test_a(self):
-        """Change me"""
-        pass
+    def test_crawl_count(self):
+        """Verify PlaceCrawler successfully visits all JSON files."""
+        pc = PlaceCrawler(self.place_json_path)
+        assert_equal(pc.count, 11)
