@@ -10,7 +10,27 @@ logger = logging.getLogger(__name__)
 
 
 class Walker():
-    """Change me."""
+    """Selectively visit files in a tree and act on them.
+
+    The following public methods are available:
+
+    - __init__(): takes two arguments when constructing an instance:
+      - path: the path to the root of the subtree that is to be walked
+      - extensions: a list of strings, each containing a filename extension
+        (including the leading '.') to be considered when acting on files found
+        in a directory. An empty extensions argument (the default) means that
+        all regular files found will be addressed.
+
+    - walk(): Walk the directory subtree rooted at the path specified when
+      the instance was constructed. For each batch of files considered (see the
+      'extensions' argument to __init__()), the internal '_do()' method is
+      called.
+
+    The _do() method:
+
+    Override this method in a subclass in order to specify fun things to do
+    to the files that walk() finds.
+    """
 
     def __init__(self, path: str, extensions=[]):
         self.path = abspath(realpath(path))
@@ -39,6 +59,12 @@ class Walker():
 
     def _do(self, files):
         """Perform some action on files at a directory node."""
+        pass
+
+
+class ReferenceWalker(Walker):
+
+    def __init__(self):
         pass
 
 
