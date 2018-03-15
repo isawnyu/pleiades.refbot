@@ -46,7 +46,8 @@ class Test_Zotero(TestCase):
                              'have remarked. One document that is worth a '
                              'look is Discoverability produced earlier this '
                              'year by a team at the University of Minnesota.',
-            'Date': '2009-10-07', 'Date Added': '2009-10-14 13:33:17',
+            'Date': '2009-10-07',
+            'Date Added': '2009-10-14 13:33:17',
             'Date Modified': '2009-10-14 13:33:58',
             'Access Date': '2009-10-14 13:33:17'
         }
@@ -65,7 +66,8 @@ class Test_Zotero(TestCase):
                 'Title': "Discoverability .. a report that's worth a look",
                 'Publication Title': "Lorcan Dempsey's weblog",
                 'Url': 'http://orweblog.oclc.org/archives/002012.html',
-                'Date': '2009-10-07', 'Date Added': '2009-10-14 13:33:17',
+                'Date': '2009-10-07',
+                'Date Added': '2009-10-14 13:33:17',
                 'Date Modified': '2009-10-14 13:33:58',
                 'Access Date': '2009-10-14 13:33:17'
             },
@@ -105,3 +107,12 @@ class Test_Zotero(TestCase):
         zc.load_csv(path)
         assert_equal(len(zc), 2)
 
+    def test_zotero_match_and(self):
+        """Test Zotero collection matching using logical 'and' operator."""
+        path = join('tests', 'data', 'zotero.csv')
+        zc = ZoteroCollection()
+        zc.load_csv(path)
+        m = zc.match({'Key': 'CUZWAHIZ'})
+        assert_equal(len(m), 1)
+        assert_equal(m[0]['Title'], 'Tarsus kılavuzu')
+        m = zc.match({'Item Type': 'blogPost', 'Date': '2009-10-07'})

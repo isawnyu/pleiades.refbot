@@ -46,6 +46,16 @@ class ZoteroCollection:
     def add_record(self, record: dict):
         self.__records[record['Key']] = ZoteroRecord(**record)
 
+    def match(self, fields: dict, operator='and'):
+        candidates = self.records
+        if operator == 'and':
+            for key, value in fields.items():
+                candidates = [c for c in candidates if c[key] == value]
+            return candidates
+        else:
+            raise NotImplementedError(
+                'operator "{}" is not supported'.format(operator))
+
     @property
     def records(self):
         return [v for k, v in self.__records.items()]
