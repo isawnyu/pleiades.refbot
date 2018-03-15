@@ -51,4 +51,26 @@ class Test_References(TestCase):
         pr.citation_detail = 'p. 66'
         assert_equal(pr.citation_detail, 'p. 66')
 
+    def test_bibliographic_uri(self):
+        """Test bibliographic URI"""
+        PleiadesReference(
+            bibliographic_uri='https://www.zotero.org/groups/2533/items'
+            '/9JN34TQ6')
+
+    @raises(ValueError)
+    def test_invalid_bibliographic_uri(self):
+        """Test invalid bibliographic URI"""
+        PleiadesReference(bibliographic_uri='qzt://hahaha-no')
+
+    @raises(ValueError)
+    def test_bibliographic_uri_unrecognized_domain(self):
+        """Test bibliographic URI with unrecognized domain"""
+        PleiadesReference(
+            bibliographic_uri='http://www.worldcat.org/oclc/807699049')
+
+    def test_bibliographic_uri_domains(self):
+        """Test bibliographic URI with custom domains."""
+        PleiadesReference(
+            bibliographic_uri='http://www.worldcat.org/oclc/807699049',
+            bibliographic_uri_domains=['zotero.org', 'worldcat.org'])
 

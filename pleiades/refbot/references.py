@@ -3,7 +3,12 @@
 """Fix references."""
 
 import logging
+from urllib.parse import urlparse
+import validators
+
 logger = logging.getLogger(__name__)
+
+DEFAULT_BIBLIOGRAPHIC_URI_DOMAINS = ['zotero.org']
 
 
 class ReferenceFixer:
@@ -26,8 +31,25 @@ class PleiadesReference():
 
     def __init__(self, **kwargs):
         self.history = {}
+        try:
+            domains = kwargs['bibliographic_uri_domains']
+        except KeyError:
+            self.bibliographic_uri_domains = DEFAULT_BIBLIOGRAPHIC_URI_DOMAINS
+        else:
+            self.bibliographic_uri_domains = domains
         for k, v in kwargs.items():
-            setattr(self, k, v)
+            if k in [
+                'short_title',
+                'citation_detail',
+                'formatted_citation',
+                'bibliographic_uri',
+                'bibliographic_uri_domains'
+            ]:
+                setattr(self, k, v)
+            else:
+                raise AttributeError(
+                    'PleiadesReference does not support "{}" attributes'
+                    ''.format(k))
 
     # short_title
     @property
@@ -49,6 +71,64 @@ class PleiadesReference():
         self._push_history('citation_detail', value)
         self.__citation_detail = value
 
+    # full_citation
+    @property
+    def full_citation(self):
+        return self.__full_citation
+
+    @full_citation.setter
+    def full_citation(self, value):
+        self._push_history('full_citation', value)
+        self.__full_citation = value
+
+    # bibliographic_uri
+    @property
+    def bibliographic_uri(self):
+        return self.__bibliographic_uri
+
+    @bibliographic_uri.setter
+    def bibliographic_uri(self, value):
+        if validators.url(value):
+            url_components = urlparse(value)
+            if validators.domain(url_components.netloc):
+                domains = [url_components.netloc]
+                parts = domains[0].split('.')
+                if parts[0] == 'www':
+                    domains.append('.'.join(parts[1:]))
+                invalid = True
+                for domain in domains:
+                    if domain in self.bibliographic_uri_domains:
+                        invalid = False
+                        break
+                if invalid:
+                    raise ValueError(
+                        '"{}" from "{}" is not in the list of recognized '
+                        'domains for bibliographic_uri ({})'
+                        ''.format(
+                            domains[0], value, self.bibliographic_uri_domains))
+                else:
+                    self._push_history('bibliographic_uri', value)
+                    self.__bibliographic_uri = value
+            else:
+                raise ValueError(
+                    '"{}" from "{}" is not a valid domain'
+                    ''.format(url_components.netloc, value))
+        else:
+            raise ValueError('"{}" is not a valid URL'.format(value))
+
+    # access_uri
+    @property
+    def access_uri(self):
+        return self.__access_uri
+
+    @access_uri.setter
+    def access_uri(self, value):
+        if validators.url(value):
+            self._push_history('access_uri', value)
+            self.__access_uri = value
+        else:
+            raise ValueError('"{}" is not a valid URL'.format(value))
+
     # manage property history
     def get_history(self, field_name):
         try:
@@ -67,4 +147,3 @@ class PleiadesReference():
         finally:
             h.append(value)
         return len(self.history[field_name])
-
