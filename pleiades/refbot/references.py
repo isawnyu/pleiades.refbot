@@ -43,7 +43,8 @@ class PleiadesReference():
                 'citation_detail',
                 'formatted_citation',
                 'bibliographic_uri',
-                'bibliographic_uri_domains'
+                'bibliographic_uri_domains',
+                'access_uri'
             ]:
                 setattr(self, k, v)
             else:

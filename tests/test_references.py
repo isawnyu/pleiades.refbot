@@ -74,3 +74,12 @@ class Test_References(TestCase):
             bibliographic_uri='http://www.worldcat.org/oclc/807699049',
             bibliographic_uri_domains=['zotero.org', 'worldcat.org'])
 
+    def test_access_uri(self):
+        """Test access URI"""
+        PleiadesReference(
+            access_uri='https://www.nytimes.com/')
+
+    @raises(ValueError)
+    def test_invalid_access_uri(self):
+        """Test invalid access URI"""
+        PleiadesReference(access_uri="Who doesn't love pickles?")
