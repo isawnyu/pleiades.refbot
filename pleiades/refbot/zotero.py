@@ -6,8 +6,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class ZoteroRecord():
+class ZoteroRecord(dict):
     """Store and manipulate data from a single Zotero record."""
 
-    def __init__(self):
-        pass
+    __getattr__ = dict.__getitem__
+
+    def __init__(self, **kwargs):
+        dict.__init__(self, **kwargs)
+
+    def __str__(self):
+        f = '<{}={{}}:{{}}>'.format(str(type(self)).split("'")[1])
+        for k in ['shortTitle', 'title']:
+            s = self[k]
+            if s != '':
+                return f.format(self['key'], s)
+        return repr(self)

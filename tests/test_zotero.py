@@ -34,4 +34,22 @@ class Test_Zotero(TestCase):
 
     def test_zotero_record(self):
         """Test Zotero record"""
-        pass
+        data = {
+            'Key': '6S3UA6RW',
+            'Item Type': 'blogPost',
+            'Publication Year': '2009',
+            'Author': 'Dempsey, Lorcan',
+            'Title': "Discoverability .. a report that's worth a look",
+            'Publication Title': "Lorcan Dempsey's weblog",
+            'Url': 'http://orweblog.oclc.org/archives/002012.html',
+            'Abstract Note': 'We are awash in assisted thinking, as I may '
+                             'have remarked. One document that is worth a '
+                             'look is Discoverability produced earlier this '
+                             'year by a team at the University of Minnesota.',
+            'Date': '2009-10-07', 'Date Added': '2009-10-14 13:33:17',
+            'Date Modified': '2009-10-14 13:33:58',
+            'Access Date': '2009-10-14 13:33:17'
+        }
+        zr = ZoteroRecord(**data)
+        for k in data.keys():
+            assert_equal(zr[k], data[k])
