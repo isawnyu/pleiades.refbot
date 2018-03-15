@@ -44,7 +44,8 @@ class PleiadesReference():
                 'formatted_citation',
                 'bibliographic_uri',
                 'bibliographic_uri_domains',
-                'access_uri'
+                'access_uri',
+                'alternate_uri'
             ]:
                 setattr(self, k, v)
             else:
@@ -127,6 +128,19 @@ class PleiadesReference():
         if validators.url(value):
             self._push_history('access_uri', value)
             self.__access_uri = value
+        else:
+            raise ValueError('"{}" is not a valid URL'.format(value))
+
+    # alternate_uri
+    @property
+    def alternate_uri(self):
+        return self.__alternate_uri
+
+    @alternate_uri.setter
+    def alternate_uri(self, value):
+        if validators.url(value):
+            self._push_history('alternate_uri', value)
+            self.__alternate_uri = value
         else:
             raise ValueError('"{}" is not a valid URL'.format(value))
 

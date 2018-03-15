@@ -83,3 +83,13 @@ class Test_References(TestCase):
     def test_invalid_access_uri(self):
         """Test invalid access URI"""
         PleiadesReference(access_uri="Who doesn't love pickles?")
+
+    def test_alternate_uri(self):
+        """Test alternate URI"""
+        PleiadesReference(
+            alternate_uri='https://www.nytimes.com/')
+
+    @raises(ValueError)
+    def test_invalid_alternate_uri(self):
+        """Test invalid alternate URI"""
+        PleiadesReference(alternate_uri="Who doesn't love saffron?")
