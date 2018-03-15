@@ -44,7 +44,7 @@ class PleiadesReference():
     def citation_detail(self):
         return self.__citation_detail
 
-    @short_title.setter
+    @citation_detail.setter
     def citation_detail(self, value):
         self._push_history('citation_detail', value)
         self.__citation_detail = value

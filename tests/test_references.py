@@ -43,9 +43,11 @@ class Test_References(TestCase):
             short_title='Talbert 2000',
             citation_detail='37 A2 Moontown')
         assert_equal(pr.short_title, 'Talbert 2000')
+        assert_equal(pr.citation_detail, '37 A2 Moontown')
         pr.short_title = 'Talbert 2010'
         assert_equal(pr.short_title, 'Talbert 2010')
         assert_equal(len(pr.get_history('short_title')), 2)
         pr.citation_detail = 'p. 66'
+        assert_equal(pr.citation_detail, 'p. 66')
 
 
