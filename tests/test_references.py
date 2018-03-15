@@ -103,3 +103,8 @@ class Test_References(TestCase):
     def test_invalid_alternate_uri(self):
         """Test invalid alternate URI"""
         PleiadesReference(alternate_uri="Who doesn't love saffron?")
+
+    def test_other_identifier(self):
+        """Test other identifier"""
+        pr = PleiadesReference(other_identifier="7773-025S")
+        assert_equal(pr.other_identifier, '7773-025S')

@@ -45,7 +45,8 @@ class PleiadesReference():
                 'bibliographic_uri',
                 'bibliographic_uri_domains',
                 'access_uri',
-                'alternate_uri'
+                'alternate_uri',
+                'other_identifier'
             ]:
                 setattr(self, k, v)
             else:
@@ -143,6 +144,16 @@ class PleiadesReference():
             self.__alternate_uri = value
         else:
             raise ValueError('"{}" is not a valid URL'.format(value))
+
+    # other_identifier
+    @property
+    def other_identifier(self):
+        return self.__other_identifier
+
+    @other_identifier.setter
+    def other_identifier(self, value):
+        self._push_history('other_identifier', value)
+        self.__other_identifier = value
 
     # manage property history
     def get_history(self, field_name):
