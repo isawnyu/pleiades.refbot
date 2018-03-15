@@ -56,5 +56,39 @@ class Test_Zotero(TestCase):
 
     def test_zotero_collection(self):
         """Test Zotero collection"""
-        pass
-
+        data = [
+            {
+                'Key': '6S3UA6RW',
+                'Item Type': 'blogPost',
+                'Publication Year': '2009',
+                'Author': 'Dempsey, Lorcan',
+                'Title': "Discoverability .. a report that's worth a look",
+                'Publication Title': "Lorcan Dempsey's weblog",
+                'Url': 'http://orweblog.oclc.org/archives/002012.html',
+                'Date': '2009-10-07', 'Date Added': '2009-10-14 13:33:17',
+                'Date Modified': '2009-10-14 13:33:58',
+                'Access Date': '2009-10-14 13:33:17'
+            },
+            {
+                'Author': 'Erzen, Afif',
+                'Call Number': 'DS51.T2 E79 1943',
+                'Date': '1943',
+                'Date Added': '2014-02-05 17:43:29',
+                'Date Modified': '2016-02-25 11:15:05',
+                'Extra': 'OCLC: 827268834',
+                'Item Type': 'book',
+                'Key': 'CUZWAHIZ',
+                'Language': 'Turkish',
+                'Library Catalog': 'Open WorldCat',
+                'Num Pages': '30',
+                'Place': 'İstanbul',
+                'Publication Year': '1943',
+                'Publisher': 'Maarif Matbaası',
+                'Series': 'Maarif Vekilliği, Antikiteler ve Müzeler '
+                          'Direktörlüğü, Anıtları Koruma Kurulu',
+                'Series Number': 'sayı 7',
+                'Title': 'Tarsus kılavuzu'
+            }
+        ]
+        zc = ZoteroCollection(data)
+        assert_equal(len(zc), 2)

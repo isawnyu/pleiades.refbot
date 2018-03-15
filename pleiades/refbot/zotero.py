@@ -26,5 +26,19 @@ class ZoteroRecord(dict):
 class ZoteroCollection:
     """Store and manipulate data for a collection of Zotero records."""
 
-    def __init__(self):
-        pass
+    def __init__(self, records: list = None):
+        self.__records = {}
+        if records is not None:
+            self.records = records
+
+    def __len__(self):
+        return len(self.__records)
+
+    @property
+    def records(self):
+        return [v for k, v in self.__records.items()]
+
+    @records.setter
+    def records(self, records: list):
+        for record in records:
+            self.__records[record['Key']] = ZoteroRecord(**record)
