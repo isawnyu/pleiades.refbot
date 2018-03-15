@@ -21,3 +21,10 @@ class ZoteroRecord(dict):
             if s != '':
                 return f.format(self['key'], s)
         return repr(self)
+
+
+class ZoteroCollection:
+    """Store and manipulate data for a collection of Zotero records."""
+
+    def __init__(self):
+        pass

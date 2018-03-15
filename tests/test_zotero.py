@@ -5,7 +5,7 @@
 import logging
 from nose.tools import assert_equal, assert_false, assert_true, raises
 from os.path import abspath, join, realpath
-from pleiades.refbot.zotero import ZoteroRecord
+from pleiades.refbot.zotero import ZoteroCollection, ZoteroRecord
 from unittest import TestCase
 
 logger = logging.getLogger(__name__)
@@ -53,3 +53,8 @@ class Test_Zotero(TestCase):
         zr = ZoteroRecord(**data)
         for k in data.keys():
             assert_equal(zr[k], data[k])
+
+    def test_zotero_collection(self):
+        """Test Zotero collection"""
+        pass
+
