@@ -41,7 +41,8 @@ class Test_References(TestCase):
         """Test Reference History"""
         pr = PleiadesReference(
             short_title='Talbert 2000',
-            citation_detail='37 A2 Moontown')
+            citation_detail='37 A2 Moontown',
+            formatted_citation='Sometimes laziness is a virtue')
         assert_equal(pr.short_title, 'Talbert 2000')
         assert_equal(pr.citation_detail, '37 A2 Moontown')
         pr.short_title = 'Talbert 2010'
