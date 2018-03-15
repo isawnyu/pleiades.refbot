@@ -21,14 +21,6 @@ class ReferenceFixer:
 class PleiadesReference():
     """House and manipulate a single Pleiades reference."""
 
-#    short_title = ''
-#    citation_detail = ''
-#    formatted_citation = ''
-#    bibliographic_uri = ''
-#    access_uri = ''
-#    alternate_uri = ''
-#    other_identifier = ''
-
     def __init__(self, **kwargs):
         self.history = {}
         try:
