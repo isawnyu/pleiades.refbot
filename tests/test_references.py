@@ -22,7 +22,7 @@ def teardown_module():
     pass
 
 
-class Test_This(TestCase):
+class Test_References(TestCase):
 
     def setUp(self):
         """Change me"""
@@ -32,6 +32,17 @@ class Test_This(TestCase):
         """Change me"""
         pass
 
-    def test_a(self):
-        """Change me"""
-        pass
+    def test_reference_construction(self):
+        """Test Reference Construction"""
+        pr = PleiadesReference(short_title='Talbert 2000')
+        assert_equal(pr.short_title, 'Talbert 2000')
+
+    def test_reference_history(self):
+        """Test Reference History"""
+        pr = PleiadesReference(short_title='Talbert 2000')
+        assert_equal(pr.short_title, 'Talbert 2000')
+        pr.short_title = 'Talbert 2010'
+        assert_equal(pr.short_title, 'Talbert 2010')
+        assert_equal(len(pr.get_history('short_title')), 2)
+
+

@@ -13,8 +13,49 @@ class ReferenceFixer:
         pass
 
 
-class PleiadesReference:
+class PleiadesReference():
     """House and manipulate a single Pleiades reference."""
 
-    def __init__(self):
-        pass
+#    short_title = ''
+#    citation_detail = ''
+#    formatted_citation = ''
+#    bibliographic_uri = ''
+#    access_uri = ''
+#    alternate_uri = ''
+#    other_identifier = ''
+
+    def __init__(self, **kwargs):
+        self.history = {}
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    # short_title
+    @property
+    def short_title(self):
+        return self.__short_title
+
+    @short_title.setter
+    def short_title(self, value):
+        logger.debug('setting short title to {}'.format(value))
+        self._push_history('short_title', value)
+        self.__short_title = value
+
+    # manage property history
+    def get_history(self, field_name):
+        try:
+            h = self.history[field_name]
+        except KeyError:
+            return []
+        else:
+            return h
+
+    def _push_history(self, field_name, value):
+        try:
+            h = self.history[field_name]
+        except KeyError:
+            self.history[field_name] = []
+            h = self.history[field_name]
+        finally:
+            h.append(value)
+        return len(self.history[field_name])
+
