@@ -92,3 +92,16 @@ class Test_Zotero(TestCase):
         ]
         zc = ZoteroCollection(data)
         assert_equal(len(zc), 2)
+        del zc
+        zc = ZoteroCollection()
+        assert_equal(len(zc), 0)
+        zc.records = data
+        assert_equal(len(zc), 2)
+
+    def test_zotero_collection_load_csv(self):
+        """Test collection CSV loading"""
+        path = join('tests', 'data', 'zotero.csv')
+        zc = ZoteroCollection()
+        zc.load_csv(path)
+        assert_equal(len(zc), 2)
+

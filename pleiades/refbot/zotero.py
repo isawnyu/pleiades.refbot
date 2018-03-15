@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 """Provide Zotero support for pleiades.refbot."""
 
+import csv
 import logging
+from os.path import abspath, realpath
 logger = logging.getLogger(__name__)
 
 
@@ -34,6 +36,16 @@ class ZoteroCollection:
     def __len__(self):
         return len(self.__records)
 
+    def load_csv(self, path):
+        self.filename = abspath(realpath(path))
+        with open(self.filename, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                self.add_record(row)
+
+    def add_record(self, record: dict):
+        self.__records[record['Key']] = ZoteroRecord(**record)
+
     @property
     def records(self):
         return [v for k, v in self.__records.items()]
@@ -41,4 +53,4 @@ class ZoteroCollection:
     @records.setter
     def records(self, records: list):
         for record in records:
-            self.__records[record['Key']] = ZoteroRecord(**record)
+            self.add_record(record)
