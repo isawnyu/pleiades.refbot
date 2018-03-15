@@ -5,6 +5,7 @@
 import logging
 from nose.tools import assert_equal, assert_false, assert_true, raises
 from os.path import abspath, join, realpath
+from pleiades.refbot.zotero import ZoteroRecord
 from unittest import TestCase
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ def teardown_module():
     pass
 
 
-class Test_This(TestCase):
+class Test_Zotero(TestCase):
 
     def setUp(self):
         """Change me"""
@@ -31,6 +32,6 @@ class Test_This(TestCase):
         """Change me"""
         pass
 
-    def test_a(self):
-        """Change me"""
+    def test_zotero_record(self):
+        """Test Zotero record"""
         pass
