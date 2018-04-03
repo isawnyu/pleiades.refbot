@@ -116,3 +116,15 @@ class Test_Zotero(TestCase):
         assert_equal(len(m), 1)
         assert_equal(m[0]['Title'], 'Tarsus kılavuzu')
         m = zc.match({'Item Type': 'blogPost', 'Date': '2009-10-07'})
+        assert_equal(
+            str(m[0]),
+            'ZoteroRecord(6S3UA6RW): "Discoverability .. a report that\'s '
+            'worth a look"')
+
+    @raises(NotImplementedError)
+    def test_zotero_match_notimplemented(self):
+        """Test Zotero collection matching using and unexpected operator."""
+        path = join('tests', 'data', 'zotero.csv')
+        zc = ZoteroCollection()
+        zc.load_csv(path)
+        zc.match({'Key': 'CUZWAHIZ'}, operator='foo')

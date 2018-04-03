@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Crawl through Pleiades place resources."""
+"""Walk a directory tree and perform customizeable actions."""
 
 import logging
 import json
@@ -55,68 +55,43 @@ class Walker():
             logger.debug('selected files: {}'.format(sorted(select_files)))
             if count:
                 self.count += len(select_files)
-            self._do(root, select_files)
-        return self.count
+            data = self._load(root, select_files)
+            data = self._clean(data)
+            result = self._do(data)
+        return (self.count, result)
 
-    def _do(self, root, files):
+    def _load(self, root, filenames):
         """Perform some action on files at a directory node."""
+
+        data = []
+        for filename in filenames:
+            with open(join(root, filename), 'r') as f:
+                data.append(f.read())
+            del f
+        return data
+
+    def _clean(self, data: list):
+        """Cleanup the data you loaded."""
+        return data
+
+    def _do(self, data: list):
+        """Do something with the data you loaded in self._load."""
         pass
 
 
-class ReferenceWalker(Walker):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.places = {}
-
-    def _do(self, root, files):
-        for file_name in files:
-            logger.debug('parsing {}'.format(file_name))
-            file_path = join(root, file_name)
-            with open(file_path, 'r', encoding='utf-8') as f:
-                place = json.load(f)
-            del f
-            d = {
-                'references': [r for r in place['references']],
-                'locations': {},
-                'names': {},
-                'connections': {}
-            }
-            for location in place['locations']:
-                d['locations'][location['id']] = [
-                    r for r in location['references']]
-            for name in place['names']:
-                d['names'][name['id']] = [r for r in name['references']]
-            # TBD: for connection in place['connections']:
-            self.places[place['id']] = d
-            del place
-
-
-class PlaceCrawler():
-    """A class to crawl a hierarchical directory tree of Pleiades place JSON.
+class JsonWalker(Walker):
+    """A class to crawl a hierarchical directory tree JSON files.
     """
 
-    def __init__(self, json_path, count=True):
-        """Initialize the PlaceCrawler class and sniff the JSON tree."""
-        self.json_path = json_path
-        self.count = False
-        if count:
-            self._count_json_files()
+    def __init__(self, path):
+        """Initialize the class."""
+        super().__init__(path=path, extensions=['.json'])
 
-    def _count_json_files(self):
-        """Walk the tree and json_path and count each JSON file visited."""
-        walker = Walker(self.json_path, ['.json'])
-        self.count = walker.walk(count=True)
+    def _load(self, root, filenames):
 
-    def get_references(self):
-        """Walk the tree and extract and store all references encountered."""
-        walker = ReferenceWalker(path=self.json_path, extensions=['.json'])
-        self.count = walker.walk()
-        self.places = walker.places
-        self.reference_count = 0
-        for pid, pdata in self.places.items():
-            self.reference_count += len(pdata['references'])
-            for subtype in ['locations', 'names', 'connections']:
-                for subid, subrefs in pdata[subtype].items():
-                    self.reference_count += len(subrefs)
-        return self.places
+        data = []
+        for filename in filenames:
+            with open(join(root, filename), 'r', encoding='utf-8') as f:
+                data.append(json.load(f))
+            del f
+        return data

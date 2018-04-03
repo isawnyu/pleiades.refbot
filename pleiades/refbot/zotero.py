@@ -17,11 +17,18 @@ class ZoteroRecord(dict):
         dict.__init__(self, **kwargs)
 
     def __str__(self):
-        f = '<{}={{}}:{{}}>'.format(str(type(self)).split("'")[1])
-        for k in ['shortTitle', 'title']:
-            s = self[k]
-            if s != '':
-                return f.format(self['key'], s)
+        f = '{}({{}}): "{{}}"'.format(
+            str(type(self)).split("'")[1].split('.')[-1])
+        s = ''
+        for k in ['ShortTitle', 'Title']:
+            try:
+                s = self[k]
+            except KeyError:
+                continue
+            else:
+                break
+        if s != '':
+            return f.format(self['Key'], s)
         return repr(self)
 
 

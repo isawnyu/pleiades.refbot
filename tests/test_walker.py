@@ -3,9 +3,9 @@
 """Test the place_crawler module."""
 
 import logging
-from nose.tools import assert_equal, assert_false, assert_true, raises
+from nose.tools import assert_equal, assert_false, assert_is_none, assert_true, raises
 from os.path import abspath, join, realpath
-from pleiades.refbot.place_crawler import PlaceCrawler
+from pleiades.refbot.walker import Walker, JsonWalker
 from unittest import TestCase
 
 logger = logging.getLogger(__name__)
@@ -35,20 +35,24 @@ class Test_This(TestCase):
         """Change me"""
         pass
 
-    def test_crawl_count(self):
-        """Verify PlaceCrawler successfully visits all JSON files."""
-        pc = PlaceCrawler(self.place_json_path)
-        assert_equal(pc.count, 11)
+    @raises(IOError)
+    def test_walker_bad_path(self):
+        path = join('highway', 'to', 'hell')
+        w = Walker(path=path)
 
-    def test_crawl_count_not(self):
-        """Verify we can tell PlaceCrawler not to count what it visits."""
-        pc = PlaceCrawler(self.place_json_path, count=False)
-        assert_equal(pc.count, False)
+    def test_walker_good_path(self):
+        w = Walker(path=self.place_json_path)
+        assert_false(w.count)
+        assert_equal(len(w.extensions), 0)
+        count, result = w.walk()
+        assert_equal(count, 13)
+        assert_is_none(result)
 
-    def test_crawl_references(self):
-        pc = PlaceCrawler(self.place_json_path, count=False)
-        pc.get_references()
-        assert_equal(pc.count, 11)
-        assert_equal(len(pc.places), 11)
-        assert_equal(pc.reference_count, 26)
+    def test_walker_no_count(self):
+        w = Walker(path=self.place_json_path)
+        count, result = w.walk(count=False)
+        assert_false(count)
 
+    def test_json_walker(self):
+        w = JsonWalker(path=self.place_json_path)
+        count, result = w.walk()

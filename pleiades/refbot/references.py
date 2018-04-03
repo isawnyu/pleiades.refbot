@@ -3,19 +3,13 @@
 """Fix references."""
 
 import logging
+from os.path import join
 from urllib.parse import urlparse
 import validators
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_BIBLIOGRAPHIC_URI_DOMAINS = ['zotero.org']
-
-
-class ReferenceFixer:
-    """This class kills crummy references and resurrects them in glory."""
-
-    def __init__(self):
-        pass
 
 
 class PleiadesReference():
@@ -38,7 +32,8 @@ class PleiadesReference():
                 'bibliographic_uri_domains',
                 'access_uri',
                 'alternate_uri',
-                'other_identifier'
+                'other_identifier',
+                'full_citation'
             ]:
                 setattr(self, k, v)
             else:
