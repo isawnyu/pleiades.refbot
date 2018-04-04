@@ -53,6 +53,9 @@ class ZoteroCollection:
     def add_record(self, record: dict):
         self.__records[record['Key']] = ZoteroRecord(**record)
 
+    def get_record(self, record_key):
+        return self.__records[record_key]
+
     def match(self, fields: dict, operator='and'):
         candidates = self.records
         if operator == 'and':
