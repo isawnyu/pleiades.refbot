@@ -135,10 +135,16 @@ class Test_Zotero(TestCase):
         zc = ZoteroCollection()
         zc.load_csv(path)
         criteria = {
-            'required': ['Title', 'ShortTitle']
+            'required': ['Title', 'ISSN']
         }
-        errors = zc.validate(criteria)
-        print(errors)
-        assert_equal(len(errors), 2)
-        for k, v in errors.items():
-            assert_equal(v['required'][0], 'ShortTitle')
+        invalid_records = zc.validate(criteria)
+        assert_equal(len(invalid_records), 2)
+        for k, v in invalid_records.items():
+            assert_equal(v['required'][0], 'ISSN')
+        criteria = {
+            'required': ['Title', 'Canary']
+        }
+        invalid_records = zc.validate(criteria)
+        assert_equal(len(invalid_records), 2)
+        for k, v in invalid_records.items():
+            assert_equal(v['unexpected'][0], 'Canary')

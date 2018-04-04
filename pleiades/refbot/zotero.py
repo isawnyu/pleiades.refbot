@@ -70,25 +70,17 @@ class ZoteroCollection:
                 for field in cv:
                     for r in self.records:
                         try:
-                            r[field]
+                            value = r[field]
                         except KeyError:
-                            try:
-                                f = failures[r['Key']]
-                            except KeyError:
-                                failures[r['Key']] = {}
-                                f = failures[r['Key']]
-                            try:
-                                ff = f[ck]
-                            except KeyError:
-                                f[ck] = []
-                                ff = f[ck]
-                            ff.append(field)
+                            _fail(failures, r['Key'], 'unexpected', field)
+                        else:
+                            if len(value.strip()) == 0:
+                                _fail(failures, r['Key'], ck, field)
             else:
                 raise NotImplementedError(
                     'cannot validate a ZoteroCollection based on {}'
                     ''.format(ck))
         return failures
-
 
     @property
     def records(self):
@@ -98,3 +90,17 @@ class ZoteroCollection:
     def records(self, records: list):
         for record in records:
             self.add_record(record)
+
+
+def _fail(failures, record_key, criterion, detail):
+    try:
+        invalid = failures[record_key]
+    except KeyError:
+        failures[record_key] = {}
+        invalid = failures[record_key]
+    try:
+        failure = invalid[criterion]
+    except KeyError:
+        invalid[criterion] = []
+        failure = invalid[criterion]
+    failure.append(detail)
