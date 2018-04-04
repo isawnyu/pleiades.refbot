@@ -128,3 +128,17 @@ class Test_Zotero(TestCase):
         zc = ZoteroCollection()
         zc.load_csv(path)
         zc.match({'Key': 'CUZWAHIZ'}, operator='foo')
+
+    def test_zotero_validation(self):
+        """Test Zotero library validation."""
+        path = join('tests', 'data', 'zotero.csv')
+        zc = ZoteroCollection()
+        zc.load_csv(path)
+        criteria = {
+            'required': ['Title', 'ShortTitle']
+        }
+        errors = zc.validate(criteria)
+        print(errors)
+        assert_equal(len(errors), 2)
+        for k, v in errors.items():
+            assert_equal(v['required'][0], 'ShortTitle')

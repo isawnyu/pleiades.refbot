@@ -63,6 +63,33 @@ class ZoteroCollection:
             raise NotImplementedError(
                 'operator "{}" is not supported'.format(operator))
 
+    def validate(self, criteria={}):
+        failures = {}
+        for ck, cv in criteria.items():
+            if ck == 'required':
+                for field in cv:
+                    for r in self.records:
+                        try:
+                            r[field]
+                        except KeyError:
+                            try:
+                                f = failures[r['Key']]
+                            except KeyError:
+                                failures[r['Key']] = {}
+                                f = failures[r['Key']]
+                            try:
+                                ff = f[ck]
+                            except KeyError:
+                                f[ck] = []
+                                ff = f[ck]
+                            ff.append(field)
+            else:
+                raise NotImplementedError(
+                    'cannot validate a ZoteroCollection based on {}'
+                    ''.format(ck))
+        return failures
+
+
     @property
     def records(self):
         return [v for k, v in self.__records.items()]
