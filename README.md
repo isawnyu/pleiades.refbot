@@ -1,9 +1,51 @@
-# A sample Python project README file
+# pleiades.refbot
 
-This is the README file for the project.
+A collection of python modules and scripts for working with bibliographic data for the [Pleiades gazetteer of ancient places](https://pleiades.stoa.org).
 
-The file should use UTF-8 encoding and be written using [Github-flavored Markdown Text](https://guides.github.com/features/mastering-markdown/). It will be displayed as the package repository home page on [GitHub](https://github.com/), and should be written for that purpose. 
+## scripts
 
-Note that, if and when the package is to be distributed via [PyPI](https://pypi.python.org/pypi)r, it will be necessary to convert this file to [reStructuredText](http://docutils.sourceforge.net/rst.html) format. [Pandoc](http://pandoc.org/) is the preferred tool for this task.
+### validate_zotero.py
 
-Typical contents for this file would include an overview of the project, basic usage examples, etc. Generally, including the project changelog in here is not a good idea, although a simple "What's New" section for the most recent version may be appropriate.
+Does (at present very basic) validation on a [Zotero](https://zotero.org) library that has been exported to a CSV file. Run it like:
+
+```
+python scripts/validate_zotero.py -v path/to/zotero.csv
+```
+
+All that's considered is whether there are values present in each record for the "Title" and "Short Title" fields.
+
+## modules
+
+See the tests for usage details. I aim to keep test coverage at 100% for all module code.
+
+### module: ```walker```
+
+Provides two classes for working with a collection of files in a possibly hierarchical directory structure on disk:
+
+#### class: ```walker.Walker```
+
+A base class that can selectively visit files in a tree and act on them. The class is instantiated with an optional list of filename extensions to detect (if ignored, all files are considered). The ```walk``` method makes use of the ```walk``` function from the standard library, calling stub methods for loading files, cleaning data read from files, and acting on that data. These are meant to be overridden when subclassing ```Walker```.
+
+#### class ```walker.JsonWalker```
+
+Subclasses ```Walker``` to find all JSON files (extension='.json') in the specified directory subtree and read their content into memory (using the standard library ```json.load``` method). It does not override ```Walker._clean``` or ```Walker._do``` methods. It is meant to be further subclassed for specific tasks.
+
+### module: ```zotero```
+
+Provides two classes for working with Zotero bibliographic data:
+
+#### class ```zotero.ZoteroRecord```
+
+A modestly subclassed ```dict``` for storing and manipulating data from a single Zotero record. Right now, all that's overridden is the ```__str__``` function to give a helpfully abbreviated serialization.
+
+#### class ```zotero.ZoteroCollection```
+
+A class for storing and manipulating data for a collection of ```ZoteroRecord```s. This class knows how to:
+
+ - Construct itself using a list of dictionaries, each of which provides field+value pairs for a record.
+ - Load ```ZoteroRecord```s from a CSV file.
+ - Add a single ```ZoteroRecord``` to the collection from a dictionary of field+value pairs.
+ - Get a single ```ZoteroRecord``` from the collection, given its "Key"
+ - Match a subset of ```ZoteroRecords``` from the collection, given a dictionary of field+value pairs to be matched.
+ - Validate ```ZoteroRecords``` in the collection, given a dictionary of criteria statements.
+ 
