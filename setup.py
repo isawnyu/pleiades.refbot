@@ -8,20 +8,25 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 setup(
     name='pleiades.refbot',
     version='0.1',
-    description='change me',
+    description=(
+        'A collection of python modules and scripts for working with '
+        'bibliographic data for the Pleiades gazetteer of ancient places.'),
     long_description=long_description,
-    url='http://change.me',
-    author='Change Me',
-    author_email='change@me.org',
+    url='https://github.com/isawnyu/pleiades.refbot',
+    author='Tom Elliott',
+    author_email='tom.elliott@nyu.edu',
     license='LICENSE.txt',
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'Topic :: Change Me',
-        'License :: License :: OSI Approved :: GNU Affero General Public License v3'
+        'Operating System :: MacOS',
+        'Programming Language :: Python :: 3 :: Only',
+        'Topic :: Utilities',
+        'License :: License :: OSI Approved :: GNU Affero General Public '
+            'License v3'
     ],
-    keywords='"change me", "please change me',
+    keywords='"Pleiades gazetteer", "Zotero", "bibliography"',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
@@ -35,16 +40,16 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    # install_requires=['peppercorn'],
+    install_requires=['airtight', 'validators'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
     # $ pip install -e .[dev,test]
-    # extras_require={
-    #     'dev': ['check-manifest'],
-    #     'test': ['coverage'],
-    # },
+    extras_require={
+        'dev': [],
+        'test': ['coverage', 'nose'],
+    },
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
