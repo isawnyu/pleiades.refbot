@@ -9,7 +9,26 @@ A collection of python modules and scripts for working with bibliographic data f
 Does (at present very basic) validation on a [Zotero](https://zotero.org) library that has been exported to a CSV file. Run it like:
 
 ```
-python scripts/validate_zotero.py -v path/to/zotero.csv
+python scripts/validate_zotero.py -h
+usage: validate_zotero.py [-h] [-l LOGLEVEL] [-o OUTPUT] [-v] [-w] zotero_csv
+
+Validate the Pleiades Zotero Library
+
+positional arguments:
+  zotero_csv            path to the Zotero csv file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l LOGLEVEL, --loglevel LOGLEVEL
+                        desired logging level (case-insensitive string: DEBUG,
+                        INFO, WARNING, or ERROR (default: NOTSET)
+  -o OUTPUT, --output OUTPUT
+                        path to directory for CSV output of errors (default:
+                        NOTSET)
+  -v, --verbose         verbose output (logging level == INFO) (default:
+                        False)
+  -w, --veryverbose     very verbose output (logging level == DEBUG) (default:
+                        False)
 ```
 
 All that's considered is whether there are values present in each record for the "Title" and "Short Title" fields.

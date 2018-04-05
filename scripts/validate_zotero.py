@@ -5,8 +5,9 @@ Validate the Pleiades Zotero Library
 """
 
 from airtight.cli import configure_commandline
+import csv
 import logging
-from os.path import abspath, realpath
+from os.path import abspath, isdir, join, realpath
 from pleiades.refbot.zotero import ZoteroCollection
 
 
@@ -17,6 +18,8 @@ OPTIONAL_ARGUMENTS = [
     ['-l', '--loglevel', 'NOTSET',
         'desired logging level (' +
         'case-insensitive string: DEBUG, INFO, WARNING, or ERROR',
+        False],
+    ['-o', '--output', 'NOTSET', 'path to directory for CSV output of errors',
         False],
     ['-v', '--verbose', False, 'verbose output (logging level == INFO)',
         False],
@@ -50,13 +53,34 @@ def main(**kwargs):
     if kwargs['verbose']:
         print('   Validation complete.')
     print('There are {} invalid records.'.format(len(invalid_records)))
-    if kwargs['verbose']:
+    outpath = None
+    if kwargs['output'] != 'NOTSET':
+        outpath = abspath(realpath(kwargs['output']))
+        if not isdir(outpath):
+            raise IOError('{} is not a directory'.format(path))
+        outf = open(join(outpath, 'zotero_errors.csv'), 'w')
+        fieldnames = ['key', 'title', 'criterion', 'fields']
+        writer = csv.DictWriter(
+            outf, fieldnames=fieldnames, quoting=csv.QUOTE_NONNUMERIC)
+        writer.writeheader()
+    if kwargs['verbose'] or outpath is not None:
         for k, v in invalid_records.items():
-            print('INVALID Zotero Record {}:'.format(k))
-            print('        {}'.format(zc.get_record(k)['Title']))
+            if kwargs['verbose']:
+                print('INVALID Zotero Record {}:'.format(k))
+                print('        {}'.format(zc.get_record(k)['Title']))
             for criterion, fields in v.items():
-                print('        👾  {}: "{}"'.format(criterion.upper(), '", "'.join(fields)))
-
+                if kwargs['verbose']:
+                    print(
+                        '        👾  {}: "{}"'
+                        ''.format(criterion.upper(), '", "'.join(fields)))
+                if outpath is not None:
+                    writer.writerow(
+                        {
+                            'key': k,
+                            'title': zc.get_record(k)['Title'],
+                            'criterion': criterion,
+                            'fields': '|'.join(fields)
+                        })
 
 if __name__ == "__main__":
     main(
