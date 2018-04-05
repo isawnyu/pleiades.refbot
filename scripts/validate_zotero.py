@@ -45,7 +45,7 @@ def main(**kwargs):
     if kwargs['verbose']:
         print('   Loaded {} records.'.format(len(zc)))
     criteria = {
-        'required': ['Title', 'Short Title']
+        'required': ['Title', 'Short Title', 'Date']
     }
     if kwargs['verbose']:
         print('Validating ...')
@@ -59,7 +59,7 @@ def main(**kwargs):
         if not isdir(outpath):
             raise IOError('{} is not a directory'.format(path))
         outf = open(join(outpath, 'zotero_errors.csv'), 'w')
-        fieldnames = ['key', 'title', 'criterion', 'fields']
+        fieldnames = ['key', 'title', 'criterion', 'fields', 'suggestion']
         writer = csv.DictWriter(
             outf, fieldnames=fieldnames, quoting=csv.QUOTE_NONNUMERIC)
         writer.writeheader()
@@ -74,12 +74,17 @@ def main(**kwargs):
                         '        👾  {}: "{}"'
                         ''.format(criterion.upper(), '", "'.join(fields)))
                 if outpath is not None:
+                    if criterion == 'required' and fields == ['Short Title']:
+                        suggestion = zc.get_record(k).suggest_short_title()
+                    else:
+                        suggestion = ''
                     writer.writerow(
                         {
                             'key': k,
                             'title': zc.get_record(k)['Title'],
                             'criterion': criterion,
-                            'fields': '|'.join(fields)
+                            'fields': '|'.join(fields),
+                            'suggestion': suggestion
                         })
 
 if __name__ == "__main__":

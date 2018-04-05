@@ -3,6 +3,7 @@
 """Provide Zotero support for pleiades.refbot."""
 
 import csv
+from dateutil.parser import parse as parse_date
 import logging
 from os.path import abspath, realpath
 logger = logging.getLogger(__name__)
@@ -30,6 +31,31 @@ class ZoteroRecord(dict):
         if s != '':
             return f.format(self['Key'], s)
         return repr(self)
+
+    def suggest_short_title(self):
+        """Suggest a Pleiades-standard short title for this work."""
+        authors = self['Author'].strip()
+        if authors == '':
+            return self._make_short_title_acronym()
+        else:
+            try:
+                date_published = parse_date(self['Date'])
+            except ValueError:
+                return self._make_short_title_acronym()
+            else:
+                first_author = [a.strip() for a in authors.split(';')][0]
+                if ',' in first_author:
+                    last_name = first_author.split(',')[0].strip()
+                else:
+                    last_name = first_author.split()[-1].strip()
+                return '{} {}'.format(last_name, date_published.year)
+
+    def _make_short_title_acronym(self):
+        title = self['Title'].strip()
+        if ' ' not in title:
+            return title
+        else:
+            return ''.join(list(filter(str.isupper, title.title())))
 
 
 class ZoteroCollection:

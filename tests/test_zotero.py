@@ -148,3 +148,12 @@ class Test_Zotero(TestCase):
         assert_equal(len(invalid_records), 2)
         for k, v in invalid_records.items():
             assert_equal(v['unexpected'][0], 'Canary')
+
+    def test_zotero_suggest_short_title(self):
+        """Test the ZoteroRecord suggest_short_title method."""
+        path = join('tests', 'data', 'zotero_sugg.csv')
+        zc = ZoteroCollection()
+        zc.load_csv(path)
+        m = zc.match({'Title': 'Bill and Pete Go Down the Nile.'})
+        assert_equal(len(m), 1)
+        assert_equal(m[0].suggest_short_title(), 'DePaola 2009')
