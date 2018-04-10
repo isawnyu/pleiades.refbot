@@ -5,7 +5,7 @@
 import logging
 from nose.tools import assert_equal, assert_false, assert_is_none, assert_true, raises
 from os.path import abspath, join, realpath
-from pleiades.refbot.walker import Walker, JsonWalker
+from pleiades.refbot.walker import Walker, JsonWalker, PleiadesReferenceWalker
 from unittest import TestCase
 
 logger = logging.getLogger(__name__)
@@ -56,3 +56,17 @@ class Test_This(TestCase):
     def test_json_walker(self):
         w = JsonWalker(path=self.place_json_path)
         count, result = w.walk()
+
+    def test_pleiades_references_walker(self):
+        w = PleiadesReferenceWalker(path=self.place_json_path)
+        count, result = w.walk()
+        assert_equal(len(w.references), 11)
+        p = w.references['1000']
+        assert_equal(len(p['place_references']), 5)
+        assert_equal(len(p['names']), 1)
+        n = p['names']['germania-superior']
+        assert_equal(len(n), 0)
+        assert_equal(len(p['locations']), 1)
+        l = p['locations']['batlas-location']
+        assert_equal(len(l), 0)
+

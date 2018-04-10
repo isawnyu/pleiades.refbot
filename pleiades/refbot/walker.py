@@ -6,6 +6,7 @@ import logging
 import json
 from os import walk
 from os.path import abspath, isdir, join, realpath, splitext
+from pleiades.refbot.references import PleiadesReference
 
 logger = logging.getLogger(__name__)
 
@@ -95,3 +96,35 @@ class JsonWalker(Walker):
                 data.append(json.load(f))
             del f
         return data
+
+
+class PleiadesReferenceWalker(JsonWalker):
+    """A class to crawl Pleiades JSON files and extract references.
+    """
+
+    def __init__(self, path):
+        super().__init__(path=path)
+        self.references = {}
+
+    def _do(self, data):
+        for datum in data:
+            d = {}
+            references = []
+            for r in datum['references']:
+                references.append(PleiadesReference(**r))
+            d['place_references'] = references
+
+            d['locations'] = {}
+            for l in datum['locations']:
+                references = []
+                for r in l['references']:
+                    references.append(PleiadesReference(**r))
+                d['locations'][l['id']] = references
+            d['names'] = {}
+            for n in datum['names']:
+                references = []
+                for r in n['references']:
+                    references.append(PleiadesReference(**r))
+                d['names'][n['id']] = references
+            self.references[datum['id']] = d
+

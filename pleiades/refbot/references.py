@@ -4,12 +4,18 @@
 
 import logging
 from os.path import join
+import re
 from urllib.parse import urlparse
 import validators
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_BIBLIOGRAPHIC_URI_DOMAINS = ['zotero.org']
+
+
+def _convert_camel(v):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', v)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
 class PleiadesReference():
@@ -24,22 +30,64 @@ class PleiadesReference():
         else:
             self.bibliographic_uri_domains = domains
         for k, v in kwargs.items():
-            if k in [
-                'short_title',
-                'citation_detail',
-                'formatted_citation',
-                'bibliographic_uri',
-                'bibliographic_uri_domains',
-                'access_uri',
-                'alternate_uri',
-                'other_identifier',
-                'full_citation'
-            ]:
-                setattr(self, k, v)
-            else:
-                raise AttributeError(
-                    'PleiadesReference does not support "{}" attributes'
-                    ''.format(k))
+            if v != '':
+                if k in [
+                    'short_title',
+                    'citation_detail',
+                    'formatted_citation',
+                    'bibliographic_uri',
+                    'bibliographic_uri_domains',
+                    'access_uri',
+                    'alternate_uri',
+                    'other_identifier',
+                    'full_citation',
+                    'citation_type'
+                ]:
+                    setattr(self, k, v)
+                elif k in [
+                    'shortTitle',
+                    'citationDetail',
+                    'formattedCitation',
+                    'bibliographicURI',
+                    'bibliographicURIDomains',
+                    'accessURI',
+                    'alternateURI',
+                    'otherIdentifier',
+                    'fullCitation',
+                    'citationType'
+                ]:
+                    try:
+                        setattr(self, _convert_camel(k), v)
+                    except ValueError:
+                        pass
+                elif k in ['type']:
+                    setattr(self, 'citation_type', v)
+                else:
+                    raise AttributeError(
+                        'PleiadesReference does not support "{}" attributes'
+                        ''.format(k))
+
+    def __str__(self):
+        msg = ['PleiadesReference(']
+        for field in [
+            'short_title',
+            'citation_detail',
+            'formatted_citation',
+            'bibliographic_uri',
+            'bibliographic_uri_domains',
+            'access_uri',
+            'alternate_uri',
+            'other_identifier',
+            'full_citation',
+            'citation_type'
+        ]:
+            try:
+                value = getattr(self, field)
+            except AttributeError:
+                value = ''
+            msg.append('\t{}: "{}"'.format(field, value))
+        msg.append(')')
+        return '\n'.join(msg)
 
     # short_title
     @property
@@ -141,6 +189,16 @@ class PleiadesReference():
     def other_identifier(self, value):
         self._push_history('other_identifier', value)
         self.__other_identifier = value
+
+    # citation_type
+    @property
+    def citation_type(self):
+        return self.__citation_type
+
+    @citation_type.setter
+    def citation_type(self, value):
+        self._push_history('citation_type', value)
+        self.__citation_type = value
 
     # manage property history
     def get_history(self, field_name):
