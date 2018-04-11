@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 """Fixers for Pleiades references"""
 
-import logging
 from pleiades.refbot.references import PleiadesReference
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Fixer:
@@ -16,10 +18,11 @@ class Fixer:
         self.schema = {}
 
     def fix(self):
-        print("RAW")
-        print(self.raw)
+        logger.debug('RAW: {}'.format(self.raw))
         for field, directives in self.schema.items():
-            print('field: {}'.format(field))
+            logger.debug(
+                'executing directives {} on field {}'.format(
+                    repr(directives), field))
             # directive: value exists or not
             if isinstance(directives, bool):
                 if directives:
@@ -30,7 +33,7 @@ class Fixer:
                         try:
                             value = getattr(self, '_fix_{}'.format(field))()
                         except AttributeError:
-                            raise ValueError(
+                            raise RuntimeError(
                                 '{} cannot be empty'.format(field))
                         else:
                             setattr(self.cooked, field, value)
@@ -43,7 +46,7 @@ class Fixer:
                     except AttributeError:
                         pass
                     else:
-                        raise ValueError(
+                        raise RuntimeError(
                             '{} must be empty, but it is "{}"'
                             ''.format(field, value))
                 continue
@@ -74,15 +77,33 @@ class Fixer:
                     try:
                         value = getattr(self, '_fix_{}'.format(field))()
                     except AttributeError:
-                        raise ValueError(
+                        raise RuntimeError(
                             '{} must start with "{}", but instead is "{}"'
                             ''.format(field))
                     else:
                         setattr(self.cooked, field, value)
                         self.issues.append(field)
-        print("COOKED")
-        print(self.cooked)
-        print('Modified: {}'.format(repr(self.issues)))
+        # copy over any fields for which there was no directive
+        for a in [
+            a for a in dir(self.raw) if not a.startswith('_') and
+            a not in self.issues and
+            a not in [
+                    'history', 'get_history', 'bibliographic_uri_domains',
+                    'full_citation']
+        ]:
+            try:
+                raw_value = getattr(self.raw, a)
+            except AttributeError:
+                pass
+            else:
+                try:
+                    getattr(self.cooked, a)
+                except AttributeError:
+                    setattr(self.cooked, a, raw_value)
+
+        logger.debug('COOKED: {}'.format(self.cooked))
+        logger.debug('Modified: {}'.format(repr(self.issues)))
+        return (self.issues, self.cooked)
 
 
 class WHLFixer(Fixer):
