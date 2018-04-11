@@ -25,7 +25,7 @@ POSITIONAL_ARGUMENTS = [
 ]
 
 
-def main(args):
+def main(**kwargs):
     """
     main function
     """
