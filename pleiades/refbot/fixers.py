@@ -4,6 +4,7 @@
 
 from pleiades.refbot.references import PleiadesReference
 import logging
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -23,66 +24,79 @@ class Fixer:
             logger.debug(
                 'executing directives {} on field {}'.format(
                     repr(directives), field))
-            # directive: value exists or not
-            if isinstance(directives, bool):
-                if directives:
-                    # must exist
-                    try:
-                        value = getattr(self.raw, field)
-                    except AttributeError:
-                        try:
-                            value = getattr(self, '_fix_{}'.format(field))()
-                        except AttributeError:
-                            raise RuntimeError(
-                                '{} cannot be empty'.format(field))
-                        else:
-                            setattr(self.cooked, field, value)
-                            self.issues.append(field)
-                    else:
-                        setattr(self.cooked, field, value)
-                else:
-                    try:
-                        value = getattr(self.raw, field)
-                    except AttributeError:
-                        pass
-                    else:
-                        raise RuntimeError(
-                            '{} must be empty, but it is "{}"'
-                            ''.format(field, value))
-                continue
+
+            # get current value of this field
             try:
                 value = getattr(self.raw, field)
             except AttributeError:
                 value = ''
-            # directive: exact match
-            try:
-                match_value = directives['matches']
-            except KeyError:
-                pass
-            else:
-                if match_value != value:
-                    setattr(self.cooked, field, match_value)
-                    self.issues.append(field)
-                else:
-                    setattr(self.cooked, field, value)
-            # directive: starts with
-            try:
-                match_value = directives['starts_with']
-            except KeyError:
-                pass
-            else:
-                if value.startswith(match_value):
-                    setattr(self.cooked, field, value)
-                else:
-                    try:
-                        value = getattr(self, '_fix_{}'.format(field))()
-                    except AttributeError:
-                        raise RuntimeError(
-                            '{} must start with "{}", but instead is "{}"'
-                            ''.format(field))
+
+            # directive: value exists or not
+            if isinstance(directives, bool):
+                if directives:
+                    if value == '':
+                        new_value = getattr(self, '_fix_{}'.format(field))()
                     else:
-                        setattr(self.cooked, field, value)
+                        new_value = value
+                    if new_value == '':
+                        raise RuntimeError('{} cannot be empty'.format(field))
+                    elif new_value != value:
+                        setattr(self.cooked, field, new_value)
                         self.issues.append(field)
+                    else:
+                        setattr(self.cooked, field, new_value)
+                else:
+                    if value != '':
+                        raise RuntimeError(
+                            '{} must be empty, but it is "{}"'
+                            ''.format(field, value))
+                continue
+
+            # other directives
+            for d_key, d_value in directives.items():
+                logger.debug(
+                    'field="{}", d_key="{}", d_value="{}", value="{}"'
+                    ''.format(field, d_key, d_value, value))
+                if not getattr(self, '_test_{}'.format(d_key))(value, d_value):
+                    fixed_value = getattr(
+                        self, '_fix_{}'.format(field))(value, d_key, d_value)
+                    if not getattr(
+                            self,
+                            '_test_{}'.format(d_key))(fixed_value, d_value):
+                        raise RuntimeError('total failure')
+                    self.issues.append(field)
+                    setattr(self.cooked, field, fixed_value)
+                else:
+                    setattr(self.cooked, field, value)
+            # # directive: exact match
+            # try:
+            #     match_value = directives['matches']
+            # except KeyError:
+            #     pass
+            # else:
+            #     if match_value != value:
+            #         setattr(self.cooked, field, match_value)
+            #         self.issues.append(field)
+            #     else:
+            #         setattr(self.cooked, field, value)
+            # # directive: starts with
+            # try:
+            #     match_value = directives['starts_with']
+            # except KeyError:
+            #     pass
+            # else:
+            #     if value.startswith(match_value):
+            #         setattr(self.cooked, field, value)
+            #     else:
+            #         try:
+            #             value = getattr(self, '_fix_{}'.format(field))()
+            #         except AttributeError:
+            #             raise RuntimeError(
+            #                 '{} must start with "{}", but instead is "{}"'
+            #                 ''.format(field, match_value, value))
+            #         else:
+            #             setattr(self.cooked, field, value)
+            #             self.issues.append(field)
         # copy over any fields for which there was no directive
         for a in [
             a for a in dir(self.raw) if not a.startswith('_') and
@@ -105,6 +119,55 @@ class Fixer:
         logger.debug('Modified: {}'.format(repr(self.issues)))
         return (self.issues, self.cooked)
 
+    def _test_matches(self, value, match_value):
+        return value == match_value
+
+    def _test_starts_with(self, value, start_value):
+        return value.startswith(start_value)
+
+    def _fix_access_uri(self, value, d_key, d_value):
+        if d_key == 'matches':
+            return d_value
+        elif d_key == 'starts_with':
+            return self._fix_uri_starts_with(value, d_value)
+        else:
+            raise NotImplementedError(d_key)
+
+    def _fix_bibliographic_uri(self, value, d_key, d_value):
+        if d_key == 'matches':
+            return d_value
+        elif d_key == 'starts_with':
+            return self._fix_uri_starts_with(value, d_value)
+        else:
+            raise NotImplementedError(d_key)
+
+    def _fix_citation_type(self, value, d_key, d_value):
+        if d_key == 'matches':
+            return d_value
+        else:
+            raise NotImplementedError(d_key)
+
+    def _fix_short_title(self, value, d_key, d_value):
+        if d_key == 'matches':
+            return d_value
+        else:
+            raise NotImplementedError(d_key)
+
+    def _fix_uri_starts_with(self, value, d_value):
+        fixed_value = self._fix_uri_protocol(value, d_value)
+        if self._test_starts_with(fixed_value, d_value):
+            return fixed_value
+        else:
+            raise RuntimeError(
+                'could not fix "{}" (starts_with: "{}")'
+                ''.format(value, d_value))
+
+    def _fix_uri_protocol(self, value, d_value):
+        if value.startswith('http://') and d_value.startswith('https://'):
+            return 'https://{}'.format(value.split('//')[1])
+        else:
+            return value
+
 
 class WHLFixer(Fixer):
     """Fix UNESCO World Heritage Site references."""
@@ -115,13 +178,10 @@ class WHLFixer(Fixer):
             'short_title': {'matches': 'WHL'},
             'citation_detail': True,
             'bibliographic_uri': {
-                'matches': 'https://www.zotero.org/groups/2533/items/BIIFWTIR',
-                'alternate_matches': [
-                    'https://www.zotero.org/groups/2533/pleiades/items/'
-                    'itemKey/BIIFWTIR']
+                'matches': 'https://www.zotero.org/groups/2533/items/BIIFWTIR'
             },
             'access_uri': {
-                'starts_with': 'http://whc.unesco.org/en/list/'
+                'starts_with': 'https://whc.unesco.org/en/list/'
             },
             'formatted_citation': {
                 'starts_with': 'UNESCO World Heritage Centre, World Heritage '
@@ -130,7 +190,7 @@ class WHLFixer(Fixer):
             'citation_type': {'matches': 'seeFurther'}
         }
 
-    def _fix_formatted_citation(self):
+    def _fix_formatted_citation(self, value, d_key, d_value):
         """Try to fix formatted citation."""
 
         tpl = (
@@ -213,5 +273,4 @@ class WHLFixer(Fixer):
                     return detail
 
         raise ValueError('cannot fix citation detail')
-
 
